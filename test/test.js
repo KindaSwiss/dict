@@ -1,31 +1,47 @@
-var pydict = require('./../index');
-var dict = pydict.dict;
+var utils = require('./../utils.js');
+var dict = require('./../index');
 var len = dict.len;
 
 var chai = require('chai');
 var assert = chai.assert;
 var expect = chai.expect;
-// chai.config.truncateThreshold = 0;
 
+describe('isIterable', function () {
+	var isIterable = utils.isIterable;
 
-/*
-var keys = [
-  'clear',
-  'get',
-  'items',
-  'keys',
-  'pop',
-  'popitem',
-  'setdefault',
-  'update',
-  'copy',
-  'values' ]
- */
+	it('Should return whether an value can be iterated', function () {
+		expect(isIterable(''),        String).to.be.true;
+		expect(isIterable({}),        Object).to.be.true;
+		expect(isIterable([]),        Array).to.be.true;
+		expect(isIterable(null),      null).to.be.false;
+		expect(isIterable(undefined), undefined).to.be.false;
+		expect(isIterable(false),     false).to.be.false;
+		expect(isIterable(true),      true).to.be.false;
+		expect(isIterable(NaN),       NaN).to.be.false;
+		expect(isIterable(Infinity),  Infinity).to.be.false;
+	});
+});
 
+describe('isArrayLike', function () {
+	var isArrayLike = utils.isArrayLike;
 
+	it('Should return whether an value can be iterated', function () {
+		expect(isArrayLike(''),                  String).to.be.true;
+		expect(isArrayLike([]),                  Array).to.be.true;
+		expect(isArrayLike({ 0: 0, length: 1 }), Object).to.be.true;
+
+		expect(isArrayLike({ 0: 0 }),            Object).to.be.false;
+		expect(isArrayLike({}),                  Object).to.be.false;
+		expect(isArrayLike(null),                null).to.be.false;
+		expect(isArrayLike(undefined),           undefined).to.be.false;
+		expect(isArrayLike(false),               false).to.be.false;
+		expect(isArrayLike(true),                true).to.be.false;
+		expect(isArrayLike(NaN),                 NaN).to.be.false;
+		expect(isArrayLike(Infinity),            Infinity).to.be.false;
+	});
+});
 
 describe('dict', function () {
-
 	var dictionary;
 
 	var AGE = 20;
@@ -48,10 +64,7 @@ describe('dict', function () {
 	});
 
 	it('Should be defined as an function', function () {
-
-		expect(dict)
-			.to.be.a('function')
-
+		expect(dict).to.be.a('function')
 	});
 
 	it('Should return a dictionary object', function () {
@@ -82,23 +95,23 @@ describe('dict', function () {
 
 	it('Should throw an error when passed an array that contains non-iterables', function () {
 		expect(function () {
-			dict([null]); // 
+			dict([null]); //
 		}).to.throw(/cannot convert dictionary sequence element #\d to a sequence/)
 	});
 
 	it('Should throw an error when passed an array that only contains an iterable containing one item', function () {
 		expect(function () {
-			dict([['name']]); 
+			dict([['name']]);
 		}).to.throw(/dictionary update sequence element \#\d has length \d; 2 is required/)
 
 		expect(function () {
-			dict([[null]]); 
+			dict([[null]]);
 		}).to.throw(/dictionary update sequence element #\d has length \d; 2 is required/)
 	});
 
 	it('Should throw an error when passed an object with more than three own properties', function () {
 		expect(function () {
-			dict([{'name': 'Johnny', 'age': 20, 'likes': ['oranges']}]); 
+			dict([{'name': 'Johnny', 'age': 20, 'likes': ['oranges']}]);
 		}).to.throw(/dictionary update sequence element #\d has length \d; 2 is required/)
 	});
 
@@ -123,7 +136,7 @@ describe('dict', function () {
 		it('Should return a default item from the objec if the key does not exist', function () {
 			var defaultValue = [];
 			var value = dictionary.get('nope', defaultValue);
-			
+
 			expect(value)
 				.to.equal(defaultValue);
 
@@ -132,17 +145,17 @@ describe('dict', function () {
 	});
 
 	describe('#items', function () {
-		
+
 		it('Should return a list of lists containing the key and values contained within the object', function () {
 			var items = dictionary.items();
-			
+
 			expect(items)
 				.to.be.a('array')
 				.with.deep.property('[0]')
 				.to.be.a('array')
 				.to.include(NAME_KEY)
 				.to.include(NAME)
-			
+
 			expect(items)
 				.to.be.a('array')
 				.with.deep.property('[1]')
@@ -205,7 +218,7 @@ describe('dict', function () {
 		});
 
 		it('Should throw an error if the key does not exist and default value is not passed ', function () {
-			
+
 			expect(dictionary.pop.bind(this, 'nope'))
 				.to.throw(/KeyError/)
 
@@ -217,7 +230,7 @@ describe('dict', function () {
 
 			expect(value)
 				.to.equal(defaultValue)
-			
+
 		});
 
 		it('Should not pop any key from its prototype', function () {
@@ -226,7 +239,7 @@ describe('dict', function () {
 
 			expect(value)
 				.to.equal(defaultValue)
-			
+
 		});
 
 	});
@@ -246,7 +259,7 @@ describe('dict', function () {
 			dictionary.popitem();
 			dictionary.popitem();
 			dictionary.popitem();
-			
+
 			expect(dictionary.popitem.bind(dictionary))
 				.to.throw(/dictionary is empty/);
 
@@ -326,13 +339,9 @@ describe('dict', function () {
 
 			var value = 1;
 			var d = dictionary.fromkeys([1,2,3], value);
-			
-			expect(d)
-				.to.have.property('1', value)
-			expect(d)
-				.to.have.property('2', value)
-			expect(d)
-				.to.have.property('3', value)
+			expect(d).to.have.property('1', value)
+			expect(d).to.have.property('2', value)
+			expect(d).to.have.property('3', value)
 
 		});
 
@@ -340,14 +349,11 @@ describe('dict', function () {
 
 			var value = [];
 			var d = dictionary.fromkeys({'one': 1, 'two': 2, 'three': 3}, value);
-			
-			expect(d)
-				.to.have.property('one', value)
-			expect(d)
-				.to.have.property('two', value)
-			expect(d)
-				.to.have.property('three', value)
-				
+
+			expect(d).to.have.property('one', value)
+			expect(d).to.have.property('two', value)
+			expect(d).to.have.property('three', value)
+
 		});
 
 		it('Should return a dict where each key is a key of the object passed', function () {
@@ -355,36 +361,15 @@ describe('dict', function () {
 			var value = [];
 			var d = dictionary.fromkeys('letters', value);
 
-			expect(d)
-				.to.have.property('l', value)
-			expect(d)
-				.to.have.property('e', value)
-			expect(d)
-				.to.have.property('t', value)
-			expect(d)
-				.to.have.property('t', value)
-			expect(d)
-				.to.have.property('e', value)
-			expect(d)
-				.to.have.property('r', value)
-			expect(d)
-				.to.have.property('s', value)
+			expect(d).to.have.property('l', value)
+			expect(d).to.have.property('e', value)
+			expect(d).to.have.property('t', value)
+			expect(d).to.have.property('t', value)
+			expect(d).to.have.property('e', value)
+			expect(d).to.have.property('r', value)
+			expect(d).to.have.property('s', value)
 		});
 
 	});
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
